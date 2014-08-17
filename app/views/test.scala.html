@@ -1,0 +1,23 @@
+@content = {
+    @*render a test form*@
+    <div class="row">
+        <form action="/stock/buy" role="form" method="post">
+            <div class="form-group">
+                <label for="ticker">Ticker Symbol</label>
+                <input class="form-control" id="ticker" name="ticker">
+            </div>
+            <div class="form-group">
+                <label for="size">Size</label>
+                <input class="form-control" id="size" name="size">
+            </div>
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input class="form-control" id="price" name="price">
+            </div>
+            <button type="submit" class="btn btn-default">Buy</button>
+        </form>
+    </div>
+}
+
+
+@main("Dashboard")(new Html(content.toString))(null)
