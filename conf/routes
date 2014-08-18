@@ -5,6 +5,11 @@
 # Home page
 GET        /                    controllers.Application.index()
 GET        /strategies          controllers.Application.strategies()
+GET        /strategy/view/:id          controllers.Application.strategyView(id: Long)
+GET        /strategy/create          controllers.Application.strategyCreate
+GET        /strategy/modify/:id          controllers.Application.strategyModify(id: Long)
+GET        /strategy/remove/:id          controllers.Application.strategyRemove(id: Long)
+GET        /stock/:tickerSymbol          controllers.Application.stockView(tickerSymbol: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

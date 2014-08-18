@@ -1,4 +1,4 @@
-@(title: String)(content: => play.twirl.api.Html)(extra_js: Html)
+@(title: String)(content: play.twirl.api.Html)(extra_js: play.twirl.api.Html)
 
 <!DOCTYPE html>
 
@@ -284,8 +284,8 @@
             <script src="@routes.Assets.at("js/bootstrap.min.js")"></script>
                 <!-- Metis Menu Plugin JavaScript -->
             <script src="@routes.Assets.at("js/plugins/metisMenu/metisMenu.min.js")"></script>
+            @extra_js
                 <!-- Custom Theme JavaScript -->
             <script src="@routes.Assets.at("js/sb-admin-2.js")"></script>
-            @extra_js
         </body>
     </html>
