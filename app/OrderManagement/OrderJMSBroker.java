@@ -37,6 +37,7 @@ public class OrderJMSBroker implements OrderBroker {
         ConnectionFactory factory = new ActiveMQConnectionFactory(); // default broker, on localhost:61616
         try {
             connection = factory.createConnection();
+            System.out.println("Attempting to open ActiveMQ Connection...");
             connection.start();
         } catch (JMSException e) {
             e.printStackTrace();
