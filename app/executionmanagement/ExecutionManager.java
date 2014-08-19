@@ -11,6 +11,7 @@ import marketdatamanagement.MarketDataManager;
 import marketdatamanagement.datatransferobjects.Quote;
 import marketdatamanagement.exceptions.NoLongAverageAvailableException;
 import marketdatamanagement.exceptions.NoShortAverageAvailableException;
+import models.ActionHistory;
 
 import java.util.*;
 
@@ -21,12 +22,14 @@ public class ExecutionManager {
     private TruffleDataManager truffleDataManager;
     private TruffleOrderManager truffleOrderManager;
     private Map<String, Strategy> strategies;
+    private Map<Integer, Position> tradePositionMap;
     private MarketDataManager marketDataManager;
 
     public ExecutionManager(MarketDataManager marketDataManager, TruffleOrderManager truffleOrderManager, TruffleDataManager truffleDataManager) {
         this.truffleOrderManager = truffleOrderManager;
         this.marketDataManager = marketDataManager;
         this.truffleDataManager = truffleDataManager;
+        tradePositionMap = new HashMap<>();
         strategies = new HashMap<String, Strategy>();
     }
 
@@ -36,8 +39,8 @@ public class ExecutionManager {
         if (!marketDataManager.isStockSubscribed(ticker))
             marketDataManager.subscribe(ticker);
 
-        Strategy newStrategy = new TwoMovingAveragesStrategy(id, longPeriod, shortPeriod, volume, ticker, percentLoss,
-                percentProfit);
+        TwoMovingAveragesStrategy newStrategy = new TwoMovingAveragesStrategy(id, longPeriod, shortPeriod, volume, ticker, percentLoss, percentProfit);
+        truffleDataManager.insertTwoMovingAveragesStrategy(newStrategy);
         strategies.put(id, newStrategy);
         System.out.println("Strategy added.");
     }
@@ -65,9 +68,10 @@ public class ExecutionManager {
 
     private void attemptTwoMovingAveragesTransaction(TwoMovingAveragesStrategy strategy) {
         try {
-            Quote quote = marketDataManager.getSpotPrice(strategy.getStock());
-            double longAvg = marketDataManager.getLongAverage(strategy.getStock(), strategy.getLongPeriod());
-            double shortAvg = marketDataManager.getShortAverage(strategy.getStock(), strategy.getShortPeriod());
+            String tickerSymbol = strategy.getStock();
+            Quote quote = marketDataManager.getSpotPrice(tickerSymbol);
+            double longAvg = marketDataManager.getLongAverage(tickerSymbol, strategy.getLongPeriod());
+            double shortAvg = marketDataManager.getShortAverage(tickerSymbol, strategy.getShortPeriod());
             double bidPrice = quote.getBid();
             double askPrice = quote.getAsk();
             int bidSize = quote.getBidSize();
@@ -86,7 +90,7 @@ public class ExecutionManager {
                         .isShortAvgSmaller()) ? true : false;
                 System.out.println(isGoLong ? "Time to go long."
                         : "Time to go short.");
-
+                boolean isBuyOrder = isGoLong; // When opening position go long -> buy; go short -> sell
                 double strikePrice = isGoLong ? askPrice : bidPrice;
                 if (askSize==0)
                     askSize=strategy.getRemaingVolume();
@@ -98,6 +102,8 @@ public class ExecutionManager {
                 // TODO SEND TO BROKER: usedVolume
                 //tradeTransactionOpen(strategyID, volume, strikeprice, isGoLong)
                 //if successful, Position position = new Position(isGoLong, usedVolume, strikePrice, strategy.getId());
+                Position position = new Position(isGoLong, usedVolume, strikePrice, strategy.getId());
+                submitOrderToBroker(tickerSymbol, isBuyOrder, usedVolume, strikePrice, position);
 
                 Strategy originalCopy = strategies.get(strategy.getId());
                 if(originalCopy!=null){
@@ -111,20 +117,36 @@ public class ExecutionManager {
         }
     }
 
-    private void submitOrderToBroker(String tickerSymbol, boolean isBuyOrder, int size, double price){
-        truffleOrderManager.submitTrade(tickerSymbol, isBuyOrder, size, price, new TruffleOrderConfirmationListener() {
+    private void submitOrderToBroker(String tickerSymbol, boolean isBuyOrder, int size, double price, Position position){
+
+        Trade tradeSubmitted = truffleOrderManager.submitTrade(tickerSymbol, isBuyOrder, size, price, new TruffleOrderConfirmationListener() {
             //in the close or open Trade Transaction;
             //actually open position, or set a positon to close, record to database
             @Override
             public void onOrderConfirmed(Trade trade) {
-
+                double strikePrice = trade.getPrice();
+                Position position = tradePositionMap.remove(trade.getId());
+                if(!position.isOpen() && !position.isClose()){
+                    Strategy relatedStrategy = strategies.get(position.getStrategyID());
+                    ActionHistory history = truffleDataManager.insertActionHistory(relatedStrategy.getId(), position.isGoLong(), strikePrice);
+                    position.openPosition(trade.getSize(), strikePrice, history.getHistId());
+                    relatedStrategy.getPositions().add(position);
+                } else if (position.isOpen() && !position.isClose()){
+                    // TODO close position & update database & update strategy
+                    // todO if remainingVolume=0 and all postions is close then close the strategy
+                }
             }
 
             @Override
             public void onOrderFailed(Trade trade) {
-
+                // trade should be the submitted trade
+                Position position = tradePositionMap.remove(trade.getId());
+                Strategy strategy = strategies.get(position.getStrategyID());
+                int remainingVolume = strategy.getRemaingVolume() + trade.getSize();
+                strategy.setRemaingVolume(remainingVolume);
             }
         });
+        tradePositionMap.put(tradeSubmitted.getId(), position);
     }
 
     public void attemptClosePosition(String ticker, Position position,int index , double percentLoss, double percentProfit) {

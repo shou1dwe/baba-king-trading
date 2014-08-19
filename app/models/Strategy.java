@@ -12,8 +12,7 @@ import javax.persistence.*;
 public class Strategy extends Model{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public int stratId;
+    public String stratId;
 
     @ManyToOne
     @JoinTable(name="ticker")
@@ -24,7 +23,8 @@ public class Strategy extends Model{
     public double profitPercent;
     public String extras;
 
-    public Strategy(Stock stock, int vol, int remainingVol, double lossPercent, double profitPercent, String extras, Template templateId) {
+    public Strategy(String stratId, Stock stock, int vol, int remainingVol, double lossPercent, double profitPercent, String extras, Template templateId) {
+        this.stratId = stratId;
         this.stock = stock;
         this.vol = vol;
         this.remainingVol = remainingVol;
@@ -38,7 +38,7 @@ public class Strategy extends Model{
     @JoinTable(name="tempId")
     public Template templateId;
 
-    public static Finder<Integer, Strategy> find = new Finder<Integer, Strategy>(
-            Integer.class, Strategy.class
+    public static Finder<String, Strategy> find = new Finder<String, Strategy>(
+            String.class, Strategy.class
     );
 }

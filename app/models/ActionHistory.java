@@ -14,6 +14,7 @@ import java.util.Date;
 public class ActionHistory extends Model {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     public int histId;
 
     @ManyToOne
@@ -26,10 +27,9 @@ public class ActionHistory extends Model {
     public double strikePrice;
     public double closePrice;
     @Formats.DateTime(pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-    public Date actionTime = new Date();
+    public Date actionTime;
 
-    public ActionHistory(int histId, Strategy stratId, double performance, boolean isLong, boolean isClose, double strikePrice, double closePrice, Date actionTime) {
-        this.histId = histId;
+    public ActionHistory(Strategy stratId, double performance, boolean isLong, boolean isClose, double strikePrice, double closePrice, Date actionTime) {
         this.stratId = stratId;
         this.performance = performance;
         this.isLong = isLong;
@@ -43,4 +43,11 @@ public class ActionHistory extends Model {
             Integer.class, ActionHistory.class
     );
 
+    public int getHistId() {
+        return histId;
+    }
+
+    public void setHistId(int histId) {
+        this.histId = histId;
+    }
 }

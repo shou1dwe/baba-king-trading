@@ -2,18 +2,29 @@ package executionmanagement.datatransferobjects;
 
 public class Position {
 	
-	private String id;
+	private int id;
 	private boolean isGoLong;
     private int usedVolume;
     private int remainingVolume;
     private double strikePrice;
 	private double performance;
-	private boolean isClose;
+    private boolean isOpen;
+    private boolean isClose;
 	private String strategyID;
 
 
 	public Position() {
 	}
+
+    public Position(boolean isGoLong, String strategyID){
+        super();
+        this.isGoLong = isGoLong;
+        this.strategyID = strategyID;
+
+        this.performance = 0;
+        this.isOpen = false;
+        this.isClose = false;
+    }
 
 	public Position(boolean isGoLong,
 			int usedVolume, double strikePrice, String strategyID) {
@@ -24,8 +35,18 @@ public class Position {
         this.remainingVolume = usedVolume;
 		this.strikePrice = strikePrice;
 		this.performance = 0;
+        this.isOpen = false;
 		this.isClose = false;
 		this.strategyID = strategyID;
+    }
+
+    public void openPosition(int volume, double price, int histId){
+        this.usedVolume = volume;
+        this.remainingVolume = volume;
+        this.strikePrice = price;
+        this.id = histId;
+
+        this.isOpen = true;
     }
 
     public int getRemainingVolume() {
@@ -44,15 +65,23 @@ public class Position {
 		this.strategyID = strategyID;
 	}
 
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
-	public boolean isClose() {
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    public void setOpen(boolean isOpen) {
+        this.isOpen = isOpen;
+    }
+
+    public boolean isClose() {
 		return isClose;
 	}
 
