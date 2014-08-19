@@ -1,0 +1,83 @@
+@main("High Chart") {
+
+    <div id="price_chart" style="height : 400px ; min-width : 310px"></div>
+} {
+    <script src="@routes.Assets.at("js/plugins/highstock/highstock.js")"></script>
+    <script src="@routes.Assets.at("js/plugins/highstock/exporting.js")"></script>
+    <script type="application/javascript">
+    $(function () {
+
+    Highcharts.setOptions({
+    global : {
+    useUTC : false
+    }
+    });
+
+    // Create the chart
+    $('#price_chart').highcharts('StockChart', {
+    chart : {
+    events : {
+    load : function () {
+    // updating json
+    // set up the updating of the chart each second
+    var series = this.series[0];
+    setInterval(function () {
+                    $.ajax({
+                        type: "GET",
+                        url: "/stock/price",
+                        data: "symbol=AAPL",
+                        dataType: "json",
+                        success: function(result) {
+                                var x = result.timestamp, // current time
+                                y = result.price;
+                                series.addPoint([x, y], true, true);
+                        }
+                    });
+
+        }, 2000);
+    }
+    }
+    },
+
+    rangeSelector: {
+    buttons: [{
+    count: 1,
+    type: 'minute',
+    text: '1M'
+    }, {
+    count: 5,
+    type: 'minute',
+    text: '5M'
+    }, {
+    type: 'all',
+    text: 'All'
+    }],
+    inputEnabled: false,
+    selected: 0
+    },
+
+    exporting: {
+    enabled: true
+    },
+
+    series : [{
+    name : 'Price',
+    data : (function () {
+    // generate an array of random data
+    var data = [], time = (new Date()).getTime(), i;
+
+    for (i = -999; i <= 0; i += 1) {
+    data.push([
+    time + i * 999,
+    0
+    ]);
+    }
+    return data;
+    }())
+    }]
+    });
+
+    });
+
+    </script>
+}

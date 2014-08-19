@@ -2,10 +2,14 @@ package controllers;
 
 import OrderManagement.TruffleOrderManager;
 import OrderManagement.datatransferobjects.Trade;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import views.html.*;
+
+import java.util.Date;
 import java.util.Map;
 
 public class Application extends Controller {
@@ -40,8 +44,13 @@ public class Application extends Controller {
         return ok(stock_view.render(tickerSymbol));
     }
 
+    /* Test Methods */
     public static Result test() {
         return ok(test.render());
+    }
+
+    public static Result testGraph() {
+        return ok(testHighStock.render());
     }
 
     public static Result submitBuyTrade(){
@@ -69,5 +78,15 @@ public class Application extends Controller {
         } else {
             return internalServerError();
         }
+    }
+
+    public static Result fetchPrice() {
+        ObjectNode result = Json.newObject();
+        int price = (int) (Math.random() * ( 1000 - 500 ));
+        long time = new Date().getTime();
+        result.put("timestamp", time);
+        result.put("price", price);
+        System.out.println(String.format("Timestamp: %d Price: %d", time, price));
+        return ok(result);
     }
 }
