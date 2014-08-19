@@ -11,18 +11,28 @@ public class Quote {
     private int askSize;
     private double bid;
     private int bidSize;
+    private double lastTradePrice;
     private Date time;
 
     public Quote() {
     }
 
-    public Quote(String tickerSymbol, double ask, int askSize, double bid, int bidSize, Date time) {
+    public Quote(String tickerSymbol, double ask, int askSize, double bid, int bidSize, double lastTradePrice, Date time) {
         this.tickerSymbol = tickerSymbol;
         this.ask = ask;
         this.askSize = askSize;
         this.bid = bid;
         this.bidSize = bidSize;
+        this.lastTradePrice = lastTradePrice;
         this.time = time;
+    }
+
+    public double getLastTradePrice() {
+        return lastTradePrice;
+    }
+
+    public void setLastTradePrice(double lastTradePrice) {
+        this.lastTradePrice = lastTradePrice;
     }
 
     public String getTickerSymbol() {

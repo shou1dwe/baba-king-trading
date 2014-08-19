@@ -1,44 +1,40 @@
 package executionmanagement.datatransferobjects;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class TwoMovingAveragesStrategy extends Strategy{
 	private int longPeriod;
 	private int shortPeriod;
 
 	// handle by the system
-	private boolean isShortAvgSmaller; // true if currently short average is
-										// smaller than long average
-	private boolean isShortAvgLarger;
+	private Boolean isShortAvgSmaller;
+	private Boolean isShortAvgLarger;
 
 	public TwoMovingAveragesStrategy() {
 	};
 
 	public TwoMovingAveragesStrategy(String id, int longPeriod, int shortPeriod, int volume,
-                                     String stock, double percentLoss, double percentProfit,
-                                     boolean isShortAvgSmaller, boolean isShortAvgLarger) {
+                                     String stock, double percentLoss, double percentProfit) {
 		super(id, volume, volume, stock, percentLoss, percentProfit, new ArrayList<Position>());
 		this.longPeriod = longPeriod;
 		this.shortPeriod = shortPeriod;
-		this.isShortAvgSmaller = isShortAvgSmaller;
-		this.isShortAvgLarger = isShortAvgLarger;
-		this.isShortAvgSmaller = false;
+		this.isShortAvgSmaller = null;
+		this.isShortAvgLarger = null;
 	}
 
-	public boolean isShortAvgLarger() {
+	public Boolean isShortAvgLarger() {
 		return isShortAvgLarger;
 	}
 
-	public void setShortAvgLarger(boolean isShortAvgLarger) {
+	public void setShortAvgLarger(Boolean isShortAvgLarger) {
 		this.isShortAvgLarger = isShortAvgLarger;
 	}
 
-	public boolean isShortAvgSmaller() {
+	public Boolean isShortAvgSmaller() {
 		return isShortAvgSmaller;
 	}
 
-	public void setShortAvgSmaller(boolean isShortAvgSmaller) {
+	public void setShortAvgSmaller(Boolean isShortAvgSmaller) {
 		this.isShortAvgSmaller = isShortAvgSmaller;
 	}
 
@@ -57,5 +53,4 @@ public class TwoMovingAveragesStrategy extends Strategy{
 	public void setShortPeriod(int shortPeriod) {
 		this.shortPeriod = shortPeriod;
 	}
-
 }

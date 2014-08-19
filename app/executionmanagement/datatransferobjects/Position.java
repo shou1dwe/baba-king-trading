@@ -4,11 +4,13 @@ public class Position {
 	
 	private String id;
 	private boolean isGoLong;
-	private int usedVolume;
-	private double strikePrice;
-	private double performace;
+    private int usedVolume;
+    private int remainingVolume;
+    private double strikePrice;
+	private double performance;
 	private boolean isClose;
 	private String strategyID;
+
 
 	public Position() {
 	}
@@ -19,14 +21,22 @@ public class Position {
 		//this.id = id;
 		this.isGoLong = isGoLong;
 		this.usedVolume = usedVolume;
+        this.remainingVolume = usedVolume;
 		this.strikePrice = strikePrice;
-		this.performace = 0;
+		this.performance = 0;
 		this.isClose = false;
 		this.strategyID = strategyID;
-	}
+    }
 
-	
-	public String getStrategyID() {
+    public int getRemainingVolume() {
+        return remainingVolume;
+    }
+
+    public void setRemainingVolume(int remainingVolume) {
+        this.remainingVolume = remainingVolume;
+    }
+
+    public String getStrategyID() {
 		return strategyID;
 	}
 
@@ -50,12 +60,12 @@ public class Position {
 		this.isClose = isClose;
 	}
 
-	public double getPerformace() {
-		return performace;
+	public double getPerformance() {
+		return performance;
 	}
 
-	public void setPerformace(double performace) {
-		this.performace = performace;
+	public void setPerformance(double performance) {
+		this.performance = performance;
 	}
 
 	public int getUsedVolume() {
