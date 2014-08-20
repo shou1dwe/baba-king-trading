@@ -4,7 +4,8 @@ import OrderManagement.TruffleOrderManager;
 import OrderManagement.datatransferobjects.Trade;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import datamanagement.TruffleDataManager;
-import org.apache.activemq.kaha.impl.DataManager;
+import executionmanagement.ExecutionManager;
+import marketdatamanagement.MarketDataManager;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -17,8 +18,9 @@ import java.util.Map;
 public class Application extends Controller {
 
     private static TruffleOrderManager orderManager = new TruffleOrderManager();
-    private static TruffleDataManager truffleDataManager= new TruffleDataManager();
-
+    private static MarketDataManager marketDataManager = new MarketDataManager();
+    private static TruffleDataManager truffleDataManager = new TruffleDataManager();
+    private static ExecutionManager executionManager = new ExecutionManager(marketDataManager, orderManager, truffleDataManager);
 
     public static Result index() {
         return ok(index.render("Really? Your new application is ready."));
@@ -49,7 +51,13 @@ public class Application extends Controller {
         Double lossPercent = Double.parseDouble(params.get("lossPer")[0]);
 
         try {
-            truffleDataManager.insertStrategyNew(tickerSymbol, longPeriod, shortPeriod, volume, lossPercent, profitPercent, templateId);
+            switch(templateId){
+                case 1:
+                    executionManager.addTwoMovingAveragesStrategy(tickerSymbol, longPeriod, shortPeriod, volume, lossPercent, profitPercent);
+                    break;
+                default:
+                    break;
+            }
             return strategies();
         } catch (Exception e) {
             System.err.println(e);
@@ -99,8 +107,7 @@ public class Application extends Controller {
         Double price = Double.parseDouble(params.get("price")[0]);
         System.out.println(String.format("Price: %f",price));
 
-        int id = 0;
-        Trade trade = orderManager.submitTrade( tickerSymbol, isBuyOrder, size, price, null);
+        Trade trade = orderManager.submitTrade(tickerSymbol, isBuyOrder, size, price, null);
 
         if(trade!=null){
             return ok(test.render());

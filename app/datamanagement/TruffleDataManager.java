@@ -26,7 +26,6 @@ public class TruffleDataManager {
         Stock.find.ref(name).delete();
     }
 
-    // Strategy related
     public Strategy insertTwoMovingAveragesStrategy(TwoMovingAveragesStrategy strategy){
         final int templateId = 1; // TODO the static id of Two Moving Averages
         Template template = Template.find.byId(templateId);
@@ -54,11 +53,11 @@ public class TruffleDataManager {
         return newStrategy;
     }
 
+    // Template Related
     public void deleteStrategy(String id){
         Strategy.find.ref(id).delete();
     }
 
-    // Template Related
     public void insertTemplate(int id, String name){
         Template newTemp = new Template(id, name);
         Ebean.save(newTemp);
