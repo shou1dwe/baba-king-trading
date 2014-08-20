@@ -49,6 +49,10 @@ public class Application extends Controller {
         return ok(strategy_create.render("New Strategy"));
     }
 
+    public static Result getActionHistory() {
+        return ok(action_history.render(""));
+    }
+
     public static Result strategyCreatePost() {
         Map<String, String[]> params = request().body().asFormUrlEncoded();
         String tickerSymbol = params.get("ticker")[0];

@@ -9,10 +9,12 @@ GET         /strategy/view/:id               controllers.Application.strategyVie
 GET         /strategy/create                 controllers.Application.strategyCreate()
 GET         /strategy/modify/:id             controllers.Application.strategyModify(id: String)
 GET         /strategy/remove/:id             controllers.Application.strategyRemove(id: String)
+GET         /action/history                  controllers.Application.getActionHistory()
 POST        /stock/buy                       controllers.Application.submitBuyTrade()
 POST        /stock/sell                      controllers.Application.submitSellTrade()
 GET         /stock/price                     controllers.Application.fetchPrice()
 GET         /stock/view/:tickerSymbol        controllers.Application.stockView(tickerSymbol: String)
+GET         /stock/view                      controllers.Application.stockView(tickerSymbol: String)
 
 GET         /test/graph                      controllers.Application.testGraph()
 GET         /test                            controllers.Application.test()
