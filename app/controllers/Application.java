@@ -46,7 +46,7 @@ public class Application extends Controller {
     }
 
     public static Result strategyCreate() {
-        return ok(strategy_create.render("New Strategy"));
+        return play.mvc.Results.TODO;
     }
 
     public static Result getActionHistory() {
