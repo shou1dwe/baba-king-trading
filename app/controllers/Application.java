@@ -4,8 +4,12 @@ import OrderManagement.TruffleOrderManager;
 import OrderManagement.datatransferobjects.Trade;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import datamanagement.TruffleDataManager;
+import executionmanagement.AdhocExecutionManager;
 import executionmanagement.ExecutionManager;
 import marketdatamanagement.MarketDataManager;
+import marketdatamanagement.datatransferobjects.Quote;
+import models.Stock;
+import models.Strategy;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -13,6 +17,7 @@ import play.mvc.Result;
 import views.html.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class Application extends Controller {
@@ -21,17 +26,21 @@ public class Application extends Controller {
     private static MarketDataManager marketDataManager = new MarketDataManager();
     private static TruffleDataManager truffleDataManager = new TruffleDataManager();
     private static ExecutionManager executionManager = new ExecutionManager(marketDataManager, orderManager, truffleDataManager);
+    private static AdhocExecutionManager adhocExecutionManager = new AdhocExecutionManager(truffleDataManager, marketDataManager);
 
     public static Result index() {
         return ok(index.render("Really? Your new application is ready."));
     }
 
     public static Result strategies() {
-
+        List<Strategy> strategyData = truffleDataManager.getStrategyAll();
         return ok(strategies.render(""));
     }
 
-    public static Result strategyView(long id) {
+    public static Result strategyView(String id) {
+        Strategy strategy = truffleDataManager.getStrategyById(id);
+        Stock stock = strategy.stock;
+        Quote quote = marketDataManager.getSpotPrice(stock.ticker);
 
         return ok(strategy_view.render("{Strategy Title}"));
     }
@@ -65,20 +74,27 @@ public class Application extends Controller {
         }
     }
 
-    public static Result strategyModify(long id) {
+    public static Result strategyModify(String id) {
+        truffleDataManager.getStrategyById(id);
         return ok(strategy_modify.render("Modify {Strategy Title}"));
     }
 
-    public static Result strategyModifyPost(long id) {
+    public static Result strategyModifyPost(String id) {
+        // TODO
         return play.mvc.Results.TODO;
     }
 
-    public static Result strategyRemove(long id) {
+    public static Result strategyRemove(String id) {
+        truffleDataManager.deleteStrategy(id);
         return ok("Remove " + id);
     }
 
     public static Result stockView(String tickerSymbol) {
-        return ok(stock_view.render(tickerSymbol));
+        Stock stock = adhocExecutionManager.retriveStockInformationByTicker(tickerSymbol);
+        List<Strategy> strategies = stock.strategies;
+        Quote quote = adhocExecutionManager.getLatestQuote(tickerSymbol);
+        //TODO link up webpage
+        return ok(stock_view.render(stock, strategies, quote));
     }
 
     /* Test Methods */
@@ -116,13 +132,13 @@ public class Application extends Controller {
         }
     }
 
+    // Web Services
     public static Result fetchPrice() {
         ObjectNode result = Json.newObject();
         int price = (int) (Math.random() * ( 1000 - 500 ));
         long time = new Date().getTime();
         result.put("timestamp", time);
         result.put("price", price);
-        System.out.println(String.format("Timestamp: %d Price: %d", time, price));
         return ok(result);
     }
 }
