@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class OrderJMSBroker implements OrderBroker {
     public static final String QUEUE_REQUEST = "OrderBroker";
     private final String QUEUE_RESPONSE = "OrderBroker_Reply";
+    private final String externalActiveMqUrl = "tcp://10.87.194.159:61616";
     private Connection connection;
 
     private static JAXBContext context;
@@ -34,7 +35,13 @@ public class OrderJMSBroker implements OrderBroker {
     }
 
     public OrderJMSBroker(){
-        ConnectionFactory factory = new ActiveMQConnectionFactory(); // default broker, on localhost:61616
+        ConnectionFactory factory = null;
+        if(externalActiveMqUrl != null){
+            factory = new ActiveMQConnectionFactory(externalActiveMqUrl);
+
+        } else {
+            factory  = new ActiveMQConnectionFactory(); // default broker, on localhost:61616
+        }
         try {
             connection = factory.createConnection();
             System.out.println("Attempting to open ActiveMQ Connection...");
