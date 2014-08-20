@@ -1,14 +1,12 @@
-@(stock_title: String)
+@(stock: Stock, strategies: List[Strategy], quote: marketdatamanagement.datatransferobjects.Quote)
 
-@main(stock_title){
-
-
-    <div class="row">
+@main(stock.companyName){
+    <div class="row" style="padding-top: 20px">
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-xs-12">
-                        <h1>Apple Inc.<span class="pull-right" ><h3>AAPL</h3></span></h1>
+                        <h1>@stock.companyName<span class="pull-right" ><h3>@stock.exchange: @stock.ticker</h3></span></h1>
                     </div>
                 </div>
             </div>
@@ -16,33 +14,32 @@
     </div>
     <div class="row">
 
-        <div class="col-lg-8">
+        <div class="col-lg-9">
             <div id="price_chart" style="height : 400px ; min-width : 310px"></div>
         </div>
-            <div class="col-lg-4">
+            <div class="col-lg-3">
                  <!-- /.panel-heading -->
-                <br/><br/>
                 <div class="panel-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <tbody>
                                 <tr>
-                                    <td><h4>Open: </h4></td>
+                                    <td>Open:</td><td></td>
                                 </tr>
                                 <tr>
-                                    <td><h4>Close: </h4> </td>
+                                    <td>Close:</td><td></td>
                                 </tr>
                                 <tr>
-                                    <td><h4>Ask: </h4></td>
+                                    <td>Ask:</td><td>@quote.getAsk()</td>
                                 </tr>
                                 <tr>
-                                    <td><h4>Ask Size: </h4></td>
+                                    <td>Ask Size:</td><td>@quote.getAskSize()</td>
                                 </tr>
                                 <tr>
-                                    <td><h4>Bid: </h4></td>
+                                    <td>Bid:</td><td>@quote.getBid()</td>
                                 </tr>
                                 <tr>
-                                    <td><h4>Bid Size:</h4></td>
+                                    <td>Bid Size:</td><td>@quote.getBidSize()</td>
                                 </tr>
                             </tbody>
                         </table>
