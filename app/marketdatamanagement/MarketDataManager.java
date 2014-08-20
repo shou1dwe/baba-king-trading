@@ -1,8 +1,12 @@
 package marketdatamanagement;
 
+import datamanagement.TruffleDataManager;
+import marketdatamanagement.callbacks.OnCompanyInfoReceiveListener;
+import marketdatamanagement.callbacks.OnSpotPriceReceiveListener;
 import marketdatamanagement.datatransferobjects.Quote;
 import marketdatamanagement.exceptions.NoLongAverageAvailableException;
 import marketdatamanagement.exceptions.NoShortAverageAvailableException;
+import models.Stock;
 import play.libs.Akka;
 import play.libs.F;
 import play.libs.ws.WS;
@@ -16,15 +20,19 @@ import java.util.concurrent.TimeUnit;
  * Author: Xiawei
  */
 public class MarketDataManager {
+    private final MarketDataSource dataSource;
+
     private static final int UPDATE_RATE = 10;
     private Map<String, Quote> latestPrices = new HashMap<>();
     private Map<String, List<Double>> historicPrices = new HashMap<>();
     private Map<String, Double> longAverages = new HashMap<>();
 
-    private String spotPriceUrlFormat = "http://finance.yahoo.com/d/quotes.csv?s=%s&f=s0b2a5b3b6l1&e=.csv";
-    private String spotPriceUrl;
     private String historicalUrlFormat = "http://ichart.finance.yahoo.com/table.csv?s=%s&a=%d&b=%d&c=%d&d=%d&e=%d&f=%d&g=d&ignore=.csv";
     private String historicalUrl;
+
+    public MarketDataManager(){
+        dataSource = new YahooMarketData();
+    }
 
     public void startQuotesUpdate(){
         if(latestPrices.isEmpty()){
@@ -38,40 +46,28 @@ public class MarketDataManager {
                 Duration.create(UPDATE_RATE, TimeUnit.SECONDS),
                 new Runnable() {
                     public void run() {
-                        F.Promise<Void> jsonPromise = WS.url(spotPriceUrl).get().map(
-                                new F.Function<WSResponse, Void>() {
-                                    public Void apply(WSResponse response) {
-                                        String content = response.getBody();
-                                        Scanner scanner = new Scanner(content);
-                                        while (scanner.hasNextLine()) {
-                                            String line = scanner.nextLine();
-                                            String[] value = line.split(",");
-
-                                            if(!value[0].equalsIgnoreCase("N/A") && !value[1].equalsIgnoreCase("N/A")
-                                                    && !value[3].equalsIgnoreCase("N/A") && !value[5].equalsIgnoreCase("N/A")){
-                                                String tickerSymbol = value[0];
-                                                double ask = Double.parseDouble(value[1]);
-                                                int askSize = value[2].equalsIgnoreCase("N/A")?0:Integer.parseInt(value[2]);
-                                                double bid =Double.parseDouble(value[3]);
-                                                int bidSize = value[4].equalsIgnoreCase("N/A")?0:Integer.parseInt(value[4]);
-                                                double lastTradePrice = Double.parseDouble(value[5]);
-                                                Quote newQuote = new Quote(tickerSymbol,ask,askSize,bid,bidSize,lastTradePrice,new Date());
-                                                latestPrices.put(newQuote.getTickerSymbol(),newQuote);
-
-                                                List<Double> list = historicPrices.get(tickerSymbol);
-                                                list.add(lastTradePrice);
-                                            }
-                                        }
-                                        scanner.close();
-                                        System.out.println(response.getBody());
-                                        return null;
-                                    }
+                        dataSource.getSpotPrice(latestPrices.keySet(), new OnSpotPriceReceiveListener(){
+                            @Override
+                            public void onSpotPriceReceived(Quote quote) {
+                                latestPrices.put(quote.getTickerSymbol(), quote);
+                                List<Double> historicalPrices =  historicPrices.get(quote.getTickerSymbol());
+                                if (historicalPrices != null){
+                                    historicalPrices.add(quote.getLastTradePrice());
+                                } else {
+                                    historicalPrices = new ArrayList<>();
+                                    historicalPrices.add(quote.getLastTradePrice());
                                 }
-                        );
+                            }
+                        });
                     }
                 },
                 Akka.system().dispatcher()
         );
+    }
+
+    public Stock getCompanyInfo(String ticker, OnCompanyInfoReceiveListener onCompanyInfoReceiveListener){
+        F.Promise<Stock> stockInfoUpdated = dataSource.getCompanyInfoById(ticker, onCompanyInfoReceiveListener);
+        return stockInfoUpdated.get(30000);
     }
 
     public boolean isStockSubscribed(String ticker) {
@@ -81,17 +77,7 @@ public class MarketDataManager {
     public void subscribe(String ticker) {
         if (!latestPrices.containsKey(ticker)){
             latestPrices.put(ticker, null);
-            regenerateURL();
         }
-    }
-    private void regenerateURL() {
-        StringBuilder sb = new StringBuilder();
-        for(String ticker : latestPrices.keySet()){
-            sb.append(ticker);
-            sb.append(',');
-        }
-        sb.setLength(sb.length() - 1);
-        spotPriceUrl = String.format(spotPriceUrlFormat, sb.toString());
     }
 
     public Quote getSpotPrice(String stock) {
