@@ -10,6 +10,7 @@ import models.Template;
 import play.libs.Json;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by user on 8/18/2014.
@@ -17,15 +18,24 @@ import java.util.Date;
 public class TruffleDataManager {
 
     // Stock Related
-    public void insertStock(String name){
-        Stock newStock = new Stock(name);
+    public void insertStock(String ticker, String companyName, String moreInfo, String notes, String exchange){
+        Stock newStock = new Stock(ticker, companyName, moreInfo, notes, exchange);
         Ebean.save(newStock);
+    }
+
+    public Stock getStockByTicker(String symbol){
+        Stock stock = Stock.find.byId(symbol);
+        if(stock != null) {
+            List<Strategy> strategies = stock.strategies;
+        }
+        return stock;
     }
 
     public void deleteStock(String name){
         Stock.find.ref(name).delete();
     }
 
+    // Strategy Related
     public Strategy insertTwoMovingAveragesStrategy(TwoMovingAveragesStrategy strategy){
         final int templateId = 1; // TODO the static id of Two Moving Averages
         Template template = Template.find.byId(templateId);
@@ -53,11 +63,20 @@ public class TruffleDataManager {
         return newStrategy;
     }
 
-    // Template Related
+    public Strategy getStrategyById(String id) {
+        Strategy strategy = Strategy.find.byId(id);
+        return strategy;
+    }
+
+    public List<Strategy> getStrategyAll() {
+        return Strategy.find.all();
+    }
+
     public void deleteStrategy(String id){
         Strategy.find.ref(id).delete();
     }
 
+    // Template Related
     public void insertTemplate(int id, String name){
         Template newTemp = new Template(id, name);
         Ebean.save(newTemp);
