@@ -1,68 +1,166 @@
 @(message: String)
 
     @content = {
+        <link href="@routes.Assets.at("css/plugins/dataTables.bootstrap.css")" rel="stylesheet">
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Strategies</h1>
             </div>
                 <!-- /.col-lg-12 -->
-        </div>
-        <!-- /.row -->
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        Hover Rows
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
+
+            <div class="panel-body">
+                    <!-- Nav tabs -->
+                <ul class="nav nav-tabs">
+                    <li class="active" >
+                        <a href="#active" data-toggle="tab"><i class="fa fa-tasks"></i> &nbspActive Strategies</a>
+                    </li>
+                    <li class="">
+                        <a href="#history" data-toggle="tab"><i class="fa fa-history"></i> &nbspClosed Strategies</a>
+                    </li>
+                </ul>
+
+                    <!-- Tab panes -->
+                <div class="tab-content">
+                    <div class="tab-pane fade active in" id="active">
+
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-striped table-bordered table-hover">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>Username</th>
+                                        <th>Template</th>
+                                        <th>Stock Symbol</th>
+                                        <th>Quantity</th>
+                                        <th>Profit Percentage</th>
+                                        <th>Loss Percentage</th>
+                                        <th>Long Duration (days)</th>
+                                        <th>Short Duration (mins)</th>
+                                        <th>Strike Price</th>
+                                        <th>Entry Time</th>
+                                            <!--<th>Area</th>-->
+
+                                            <!--<th>Opening Hours</th>-->
+                                        <th style=""></th>
                                     </tr>
                                 </thead>
                                 <tbody>
+
                                     <tr>
-                                        <td>1</td>
-                                        <td>Mark</td>
-                                        <td>Otto</td>
-                                        <td>@@mdo</td>
+
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                            <!--<td>1300 - 2200</td>-->
+                                        <td class="btn-group btn-group-sm">
+
+                                            <button align="center" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                <span class="caret"></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                                <li><a href="/strategy/modify"><span class="glyphicon glyphicon-edit"></span> Modify</a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="/strategies"><span class="glyphicon glyphicon-trash"></span> Delete</a></li>
+                                            </ul>
+
+                                        </td>
                                     </tr>
+
                                     <tr>
-                                        <td>2</td>
-                                        <td>Jacob</td>
-                                        <td>Thornton</td>
-                                        <td>@@fat</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                            <!--<td>9:00 to 21:00</td>-->
+                                        <td class="btn-group btn-group-sm">
+
+                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                <span class="caret"></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                                <li><a href="/strategy/modify"><span class="glyphicon glyphicon-edit"></span> Modify</a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="/strategies"><span class="glyphicon glyphicon-trash"></span> Delete</a></li>
+                                            </ul>
+
+                                        </td>
                                     </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Larry</td>
-                                        <td>the Bird</td>
-                                        <td>@@twitter</td>
-                                    </tr>
+
                                 </tbody>
                             </table>
                         </div>
-                            <!-- /.table-responsive -->
                     </div>
-                        <!-- /.panel-body -->
-                </div>
-                    <!-- /.panel -->
+
+                    <div class="tab-pane fade" id="history">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+
+                                        <!-- /.panel-heading -->
+                                    <div class="panel-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Template</th>
+                                                        <th>Stock Symbol</th>
+                                                        <th>Quantity</th>
+                                                        <th>Long Duration (days)</th>
+                                                        <th>Short Duration (mins)</th>
+                                                        <th>Performance</th>
+                                                        <th>Close Time</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr class="strategy">
+                                                        <td>Two Moving Average </td>
+                                                        <td>AAPL</td>
+                                                        <td>200</td>
+                                                        <td class="">4</td>
+                                                        <td class="">20</td>
+                                                        <td class="">+3.56</td>
+                                                        <td class="">dd:mm:yyyy::hh:mm:ss</td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                            <!-- /.table-responsive -->
+                                    </div>
+                                        <!-- /.panel-body -->
+                                </div>
+                                    <!-- /.panel -->
+                            </div>
+                                <!-- /.col-lg-12 -->
+                        </div>
+
+                    </div>
+
+                 </div>
+
             </div>
-                <!-- /.col-lg-6 -->
-                </div>
+       </div>
+
+
+
     }
 
 
 @main("Strategies")(content){
     <!-- DataTables JavaScript -->
-    <script src="@routes.Assets.at("js/plugins/dataTables/jquery.dataTables.js")"></script>
     <script src="@routes.Assets.at("js/plugins/dataTables/dataTables.bootstrap.js")"></script>
+    <script src="@routes.Assets.at("js/plugins/dataTables/jquery.dataTables.js")"></script>
 
     <script>
         $(document).ready(function() {
@@ -70,3 +168,5 @@
         });
     </script>
 }
+
+
