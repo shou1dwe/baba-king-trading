@@ -42,7 +42,7 @@ public class Application extends Controller {
         Stock stock = strategy.stock;
         Quote quote = marketDataManager.getSpotPrice(stock.ticker);
 
-        return ok(strategy_view.render("{Strategy Title}"));
+        return play.mvc.Results.TODO;
     }
 
     public static Result strategyCreate() {
