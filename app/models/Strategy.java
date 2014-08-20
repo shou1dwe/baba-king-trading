@@ -14,7 +14,7 @@ public class Strategy extends Model{
     @Id
     public String stratId;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name="ticker")
     public Stock stock;
     public int vol;
