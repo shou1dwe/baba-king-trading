@@ -1,27 +1,135 @@
 @(stock_title: String)
 
 @main(stock_title){
-    <div class="col-lg-6">
-        <div class="panel panel-default">
+
+
+    <div class="row">
+        <div class="panel panel-primary">
             <div class="panel-heading">
-                Moving Line Chart Example
-            </div>
-                <!-- /.panel-heading -->
-            <div class="panel-body">
-                <div class="flot-chart">
-                    <div class="flot-chart-content" id="flot-line-chart-moving"></div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h1>Apple Inc.<span class="pull-right" ><h3>AAPL</h3></span></h1>
+                    </div>
                 </div>
             </div>
-                <!-- /.panel-body -->
         </div>
-            <!-- /.panel -->
     </div>
+    <div class="row">
+
+        <div class="col-lg-8">
+            <div id="price_chart" style="height : 400px ; min-width : 310px"></div>
+        </div>
+            <div class="col-lg-4">
+                 <!-- /.panel-heading -->
+                <br/><br/>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <td><h4>Open: </h4></td>
+                                </tr>
+                                <tr>
+                                    <td><h4>Close: </h4> </td>
+                                </tr>
+                                <tr>
+                                    <td><h4>Ask: </h4></td>
+                                </tr>
+                                <tr>
+                                    <td><h4>Ask Size: </h4></td>
+                                </tr>
+                                <tr>
+                                    <td><h4>Bid: </h4></td>
+                                </tr>
+                                <tr>
+                                    <td><h4>Bid Size:</h4></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                        <!-- /.table-responsive -->
+                </div>
+                    <!-- /.panel-body -->
+            </div>
+                <!-- /.panel -->
+        </div>
 }{
-    <!-- Flot Charts JavaScript -->
-    <script src="js/plugins/flot/excanvas.min.js"></script>
-    <script src="js/plugins/flot/jquery.flot.js"></script>
-    <script src="js/plugins/flot/jquery.flot.pie.js"></script>
-    <script src="js/plugins/flot/jquery.flot.resize.js"></script>
-    <script src="js/plugins/flot/jquery.flot.tooltip.min.js"></script>
-    <script src="js/plugins/flot/flot-data.js"></script>
+    <script src="@routes.Assets.at("js/plugins/highstock/highstock.js")"></script>
+    <script src="@routes.Assets.at("js/plugins/highstock/exporting.js")"></script>
+    <script type="application/javascript">
+    $(function () {
+
+    Highcharts.setOptions({
+    global : {
+    useUTC : false
+    }
+    });
+
+    // Create the chart
+    $('#price_chart').highcharts('StockChart', {
+    chart : {
+    events : {
+    load : function () {
+    // updating json
+    // set up the updating of the chart each second
+    var series = this.series[0];
+    setInterval(function () {
+    $.ajax({
+    type: "GET",
+    url: "/stock/price",
+    data: "symbol=AAPL",
+    dataType: "json",
+    success: function(result) {
+    var x = result.timestamp, // current time
+    y = result.price;
+    series.addPoint([x, y], true, true);
+    }
+    });
+
+    }, 2000);
+    }
+    }
+    },
+
+    rangeSelector: {
+    buttons: [{
+    count: 1,
+    type: 'minute',
+    text: '1M'
+    }, {
+    count: 5,
+    type: 'minute',
+    text: '5M'
+    }, {
+    type: 'all',
+    text: 'All'
+    }],
+    inputEnabled: false,
+    selected: 0
+    },
+
+    exporting: {
+    enabled: true
+    },
+
+    series : [{
+    name : 'Price',
+    data : (function () {
+    // generate an array of random data
+    var data = [], time = (new Date()).getTime(), i;
+
+    for (i = -999; i <= 0; i += 1) {
+    data.push([
+    time + i * 999,
+    0
+    ]);
+    }
+    return data;
+    }())
+    }]
+    });
+
+    });
+
+    </script>
 }
