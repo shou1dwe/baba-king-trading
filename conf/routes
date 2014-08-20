@@ -3,20 +3,23 @@
 # ~~~~
 
 # Home page
-GET         /                           controllers.Application.index()
-GET         /strategies                 controllers.Application.strategies()
-GET         /strategy/view/:id          controllers.Application.strategyView(id: Long)
-GET         /strategy/create            controllers.Application.strategyCreate
-GET         /strategy/modify/:id        controllers.Application.strategyModify(id: Long)
-GET         /strategy/remove/:id        controllers.Application.strategyRemove(id: Long)
-POST        /stock/buy                  controllers.Application.submitBuyTrade()
-POST        /stock/sell                 controllers.Application.submitSellTrade()
-GET         /stock/price                controllers.Application.fetchPrice()
+GET         /                                controllers.Application.index()
+GET         /strategies                      controllers.Application.strategies()
+GET         /strategy/view/:id               controllers.Application.strategyView(id: Long)
+GET         /strategy/create                 controllers.Application.strategyCreate()
+GET         /strategy/modify/:id             controllers.Application.strategyModify(id: Long)
+GET         /strategy/remove/:id             controllers.Application.strategyRemove(id: Long)
+POST        /stock/buy                       controllers.Application.submitBuyTrade()
+POST        /stock/sell                      controllers.Application.submitSellTrade()
+GET         /stock/price                     controllers.Application.fetchPrice()
 GET         /stock/view/:tickerSymbol        controllers.Application.stockView(tickerSymbol: String)
 
-GET         /test/graph                 controllers.Application.testGraph()
-GET         /test                       controllers.Application.test()
+GET         /test/graph                      controllers.Application.testGraph()
+GET         /test                            controllers.Application.test()
 
+# Strategy
+POST        /strategy/create                 controllers.Application.strategyCreatePost()
+POST        /strategy/modify/:id             controllers.Application.strategyModifyPost(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file               controllers.Assets.at(path="/public", file)
+GET         /assets/*file                    controllers.Assets.at(path="/public", file)
