@@ -7,6 +7,7 @@ import models.ActionHistory;
 import models.Stock;
 import models.Strategy;
 import models.Template;
+import play.Logger;
 import play.libs.Json;
 
 import java.util.Date;
@@ -69,7 +70,7 @@ public class TruffleDataManager {
     }
 
     public List<Strategy> getStrategyAll() {
-        return Strategy.find.all();
+        return Strategy.find.where().eq("is_deleted", Boolean.FALSE).findList();
     }
 
     public void deleteStrategy(String id){
@@ -79,6 +80,7 @@ public class TruffleDataManager {
     }
 
     public Strategy activateStrategy(String id) {
+        Logger.debug("Updating database - activating {}", id);
         Strategy strategy = Strategy.find.ref(id);
         strategy.isClose=false;
         Ebean.update(strategy);

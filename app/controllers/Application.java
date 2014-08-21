@@ -10,13 +10,15 @@ import marketdatamanagement.MarketDataManager;
 import marketdatamanagement.datatransferobjects.Quote;
 import models.Stock;
 import models.Strategy;
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.Results;
 import views.html.*;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,19 +35,23 @@ public class Application extends Controller {
     }
 
     public static Result strategies() {
-        List<Strategy> strategyData = truffleDataManager.getStrategyAll();
-        return ok(strategies.render(""));
+        List<Strategy> strategiesActive = new ArrayList<>();
+        List<Strategy> strategiesClosed = new ArrayList<>();
+        for(Strategy strategy : truffleDataManager.getStrategyAll()){
+            if(strategy.isClose == null || !strategy.isClose){
+                strategiesActive.add(strategy);
+            } else {
+                strategiesClosed.add(strategy);
+            }
+        }
+        return ok(strategies.render(strategiesActive, strategiesClosed));
     }
 
     public static Result strategyView(String id) {
         Strategy strategy = truffleDataManager.getStrategyById(id);
         Stock stock = strategy.stock;
-        Quote quote = marketDataManager.getSpotPrice(stock.ticker);
+        Quote quote = adhocExecutionManager.getLatestQuote(stock.ticker);
 
-        return play.mvc.Results.TODO;
-    }
-
-    public static Result strategyCreate() {
         return play.mvc.Results.TODO;
     }
 
@@ -73,7 +79,16 @@ public class Application extends Controller {
             }
             return strategies();
         } catch (Exception e) {
-            System.err.println(e);
+            Logger.error("Strategy Creation failed: ", e);
+            return internalServerError();
+        }
+    }
+
+    public static Result strategyActivate(String id){
+        boolean result = executionManager.activateStrategy(id);
+        if (result){
+            return redirect(request().uri());
+        } else {
             return internalServerError();
         }
     }
@@ -95,10 +110,23 @@ public class Application extends Controller {
 
     public static Result stockView(String tickerSymbol) {
         Stock stock = adhocExecutionManager.retriveStockInformationByTicker(tickerSymbol);
-        List<Strategy> strategies = stock.strategies;
-        Quote quote = adhocExecutionManager.getLatestQuote(tickerSymbol);
-        //TODO link up webpage
-        return ok(stock_view.render(stock, strategies, quote));
+        if (stock == null){
+            Logger.warn("Cannot find stock information on {}", tickerSymbol);
+        } else {
+            List<Strategy> strategiesActive = new ArrayList<>();
+            List<Strategy> strategiesClosed = new ArrayList<>();
+            for(Strategy strategy : stock.strategies){
+                if(strategy.isClose == null || !strategy.isClose){
+                    strategiesActive.add(strategy);
+                } else {
+                    strategiesClosed.add(strategy);
+                }
+            }
+            Quote quote = adhocExecutionManager.getLatestQuote(tickerSymbol);
+            //TODO link up webpage
+            return ok(stock_view.render(stock, strategiesActive, strategiesClosed, quote));
+        }
+        return Results.TODO;
     }
 
     /* Test Methods */
@@ -137,12 +165,15 @@ public class Application extends Controller {
     }
 
     // Web Services
-    public static Result fetchPrice() {
+    public static Result fetchPrice(String symbol) {
         ObjectNode result = Json.newObject();
-        int price = (int) (Math.random() * ( 1000 - 500 ));
-        long time = new Date().getTime();
-        result.put("timestamp", time);
-        result.put("price", price);
-        return ok(result);
+        Quote quote = adhocExecutionManager.getLatestQuote(symbol);
+        if (quote != null) {
+            result.put("timestamp", quote.getTime().getTime());
+            result.put("price", quote.getLastTradePrice());
+            return ok(result);
+        } else {
+            return internalServerError();
+        }
     }
 }

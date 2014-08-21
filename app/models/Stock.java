@@ -27,7 +27,7 @@ public class Stock extends Model{
     public String exchange;
 
     public Stock(String ticker, String companyName, String moreInfo, String notes, String exchange) {
-        this.ticker = ticker;
+        this.ticker = ticker != null? ticker.toUpperCase(): "";
         this.companyName = companyName;
         this.moreInfo = moreInfo;
         this.notes = notes;

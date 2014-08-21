@@ -7,4 +7,5 @@ import models.Stock;
  */
 public interface OnCompanyInfoReceiveListener {
     void onCompanyInfoReceive(Stock companyInfo);
+    void onCompanyNotExist();
 }

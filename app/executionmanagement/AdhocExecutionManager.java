@@ -5,6 +5,7 @@ import marketdatamanagement.MarketDataManager;
 import marketdatamanagement.callbacks.OnCompanyInfoReceiveListener;
 import marketdatamanagement.datatransferobjects.Quote;
 import models.Stock;
+import play.Logger;
 
 /**
  * Author: Xiawei
@@ -20,19 +21,34 @@ public class AdhocExecutionManager {
 
     public Stock retriveStockInformationByTicker(String tickerSymbol){
         Stock stock = truffleDataManager.getStockByTicker(tickerSymbol);
+        Logger.debug("Retriving {} stock info from database...", tickerSymbol);
         if (stock == null) {
+            Logger.debug("{} stock info not exist in database...", tickerSymbol);
             stock = marketDataManager.getCompanyInfo(tickerSymbol, new OnCompanyInfoReceiveListener() {
                 @Override
                 public void onCompanyInfoReceive(Stock companyInfo) {
+                    marketDataManager.subscribe(companyInfo.ticker);
                     truffleDataManager.insertStock(companyInfo.ticker, companyInfo.companyName, companyInfo.moreInfo, companyInfo.notes, companyInfo.exchange);
                 }
+
+                @Override
+                public void onCompanyNotExist() {
+                    // do nothing
+                }
             });
+            return stock;
+        } else {
+            marketDataManager.subscribe(stock.ticker);
+            return stock;
         }
 
-        return stock;
     }
 
     public Quote getLatestQuote(String tickerSymbol) {
-        return marketDataManager.getSpotPrice(tickerSymbol);
+        Quote quote = marketDataManager.getSpotPrice(tickerSymbol);
+        if(quote==null){
+            quote = marketDataManager.getSpotPriceRealtime(tickerSymbol);
+        }
+        return quote;
     }
 }

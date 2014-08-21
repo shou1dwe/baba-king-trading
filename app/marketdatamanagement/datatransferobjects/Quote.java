@@ -18,9 +18,8 @@ public class Quote {
     public Quote() {
     }
 
-    public Quote(String tickerSymbol, double ask, int askSize, double bid, int bidSize,
-                 double lastTradePrice, double change, Date time) {
-        this.tickerSymbol = tickerSymbol;
+    public Quote(String tickerSymbol, double ask, int askSize, double bid, int bidSize, double lastTradePrice, double change, Date time) {
+        this.tickerSymbol = tickerSymbol != null ? tickerSymbol.toUpperCase() : null;
         this.ask = ask;
         this.askSize = askSize;
         this.bid = bid;
@@ -92,5 +91,18 @@ public class Quote {
 
     public void setChange(double change) {
         this.change = change;
+    }
+
+    @Override
+    public String toString() {
+        return "Quote{" +
+                "tickerSymbol='" + tickerSymbol + '\'' +
+                ", ask=" + ask +
+                ", askSize=" + askSize +
+                ", bid=" + bid +
+                ", bidSize=" + bidSize +
+                ", lastTradePrice=" + lastTradePrice +
+                ", time=" + time +
+                '}';
     }
 }

@@ -29,7 +29,7 @@ public class ExecutionManagerTest {
 
         //test2
         MarketDataManager mockedMarketDataManager = mock(MarketDataManager.class);
-        Quote quote = new Quote("AAPL",94.7,1000,94.4,300,94.5, new Date());
+        Quote quote = new Quote("AAPL",94.7,1000,94.4,300,94.5, 10.0, new Date());
         when(mockedMarketDataManager.getSpotPrice("AAPL")).thenReturn(quote);
         try {
             when(mockedMarketDataManager.getLongAverage("AAPL", 10)).thenReturn(93.2);

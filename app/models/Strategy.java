@@ -18,6 +18,7 @@ public class Strategy extends Model{
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name="ticker")
     public Stock stock;
+    public String name;
     public int vol;
     public int remainingVol;
     public double lossPercent;

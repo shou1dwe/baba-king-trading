@@ -12,25 +12,28 @@ import marketdatamanagement.datatransferobjects.Quote;
 import marketdatamanagement.exceptions.NoLongAverageAvailableException;
 import marketdatamanagement.exceptions.NoShortAverageAvailableException;
 import models.ActionHistory;
+import play.Logger;
+import play.libs.Akka;
+import scala.concurrent.duration.Duration;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Author: Xiawei
  */
 public class ExecutionManager {
-    //    private TruffleDataManager truffleDataManager;
-//    private TruffleOrderManager truffleOrderManager;
-//    private Map<String, Strategy> strategies;
-//    private Map<Integer, Position> tradePositionMap;
-//    private MarketDataManager marketDataManager;
     private TruffleDataManager truffleDataManager;
     private TruffleOrderManager truffleOrderManager;
-    private Map<String, Strategy> strategies = new HashMap<>();
-    private Map<Integer, Position> tradePositionMap = new HashMap<>();
-    private MarketDataManager marketDataManager = new MarketDataManager();
+    private MarketDataManager marketDataManager;
+
+    public static Map<String, Strategy> strategies = new HashMap<>();
+    public static  Map<Integer, Position> tradePositionMap = new HashMap<>();
 
     public ExecutionManager() {
+        truffleDataManager = new TruffleDataManager();
+        truffleOrderManager = new TruffleOrderManager();
+        marketDataManager = new MarketDataManager();
     }
 
     public ExecutionManager(MarketDataManager marketDataManager, TruffleOrderManager truffleOrderManager, TruffleDataManager truffleDataManager) {
@@ -45,28 +48,40 @@ public class ExecutionManager {
                                                  double percentLoss, double percentProfit) {
         String id = String.format("Truffle-%s-%d", ticker, System.currentTimeMillis() / 1000L);
         System.out.println(id);
-        if (!marketDataManager.isStockSubscribed(ticker))
+        if (!marketDataManager.isStockSubscribed(ticker)) {
             marketDataManager.subscribe(ticker);
+        }
         TwoMovingAveragesStrategy newStrategy = new TwoMovingAveragesStrategy(id, longPeriod, shortPeriod, volume, ticker, percentLoss, percentProfit);
-        //truffleDataManager.insertTwoMovingAveragesStrategy(newStrategy);
+        truffleDataManager.insertTwoMovingAveragesStrategy(newStrategy);
         strategies.put(id, newStrategy);
         System.out.println("Strategy added.");
         return newStrategy;
     }
 
     public void startExecution() {
-        Collection<Strategy> values = new ArrayList<Strategy>(strategies.values());
-        for (Strategy strategy : values) {
-            if (strategy.getRemaingVolume() > 0) {
-                attemptTransaction(strategy);
-            }
-            List<Position> positions = new ArrayList<Position>(strategy.getPositions());
-            for (int index = 0; index < positions.size(); index++) {
-                Position p = positions.get(index);
-                if (!p.isClose())
-                    attemptClosePosition(strategy.getStock(), p, positions, strategy.getPercentLoss(), strategy.getPercentProfit());
-            }
-        }
+        Akka.system().scheduler().schedule(
+                Duration.create(0, TimeUnit.MILLISECONDS),
+                Duration.create(MarketDataManager.UPDATE_RATE, TimeUnit.SECONDS),
+                new Runnable() {
+                    public void run() {
+                        Logger.debug("Attempting strategy open/close...");
+                        Collection<Strategy> values = new ArrayList<Strategy>(strategies.values());
+                        for (Strategy strategy : values) {
+                            if (strategy.getRemaingVolume() > 0) {
+                                Logger.debug("Attempting to open position on {}..", strategy.getId());
+                                attemptTransaction(strategy);
+                            }
+                            List<Position> positions = new ArrayList<Position>(strategy.getPositions());
+                            for (int index = 0; index < positions.size(); index++) {
+                                Position p = positions.get(index);
+                                if (!p.isClose())
+                                    attemptClosePosition(strategy.getStock(), p, positions, strategy.getPercentLoss(), strategy.getPercentProfit());
+                            }
+                        }
+                    }
+                },
+                Akka.system().dispatcher());
+        Logger.debug("Strategy Execution Looper registered...");
     }
 
     public void attemptTransaction(Strategy strategy) {
@@ -80,12 +95,22 @@ public class ExecutionManager {
         try {
             String tickerSymbol = strategy.getStock();
             Quote quote = marketDataManager.getSpotPrice(tickerSymbol);
+            try {
+                while(quote == null){
+                    Thread.sleep(3000);
+                    quote = marketDataManager.getSpotPrice(tickerSymbol);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             double longAvg = marketDataManager.getLongAverage(tickerSymbol, strategy.getLongPeriod());
             double shortAvg = marketDataManager.getShortAverage(tickerSymbol, strategy.getShortPeriod());
             double bidPrice = quote.getBid();
             double askPrice = quote.getAsk();
             int bidSize = quote.getBidSize();
             int askSize = quote.getAskSize();
+
+            Logger.debug("longA: {} shortA:{} bidP:{} askP:{} bidS:{} ask:{}", longAvg, shortAvg, bidPrice, askPrice, bidSize, askSize);
 
             if (strategy.isShortAvgLarger() == null) {
                 strategy.setShortAvgLarger(shortAvg > longAvg);
@@ -94,12 +119,13 @@ public class ExecutionManager {
                 strategy.setShortAvgSmaller(shortAvg < longAvg);
             }
 
+            Logger.debug("Previous Short Avg Larger: {} Short Avg Smaller: {}", strategy.isShortAvgLarger(), strategy.isShortAvgSmaller());
+
             if ((shortAvg > longAvg && strategy.isShortAvgSmaller())
                     || (shortAvg < longAvg && strategy.isShortAvgLarger())) {
                 boolean isGoLong = (shortAvg > longAvg && strategy
                         .isShortAvgSmaller()) ? true : false;
-                System.out.println(isGoLong ? "Time to go long."
-                        : "Time to go short.");
+                Logger.info(isGoLong ? "Time to go long." : "Time to go short.");
                 boolean isBuyOrder = isGoLong; // When opening position go long -> buy; go short -> sell
                 double strikePrice = isGoLong ? askPrice : bidPrice;
                 if (askSize == -1)
@@ -117,10 +143,8 @@ public class ExecutionManager {
                     originalCopy.setRemaingVolume(strategy.getRemaingVolume() - usedVolume);
                 }
             }
-        } catch (NoLongAverageAvailableException e) {
-            e.printStackTrace();
-        } catch (NoShortAverageAvailableException e) {
-            e.printStackTrace();
+        } catch (NoLongAverageAvailableException | NoShortAverageAvailableException e) {
+            Logger.warn("Error opening position on {}: {}", strategy.getId(), e.getMessage());
         }
     }
 
@@ -188,6 +212,14 @@ public class ExecutionManager {
 
         double percentChange = 0;
         Quote quote = marketDataManager.getSpotPrice(ticker);
+        try {
+            while(quote == null){
+                Thread.sleep(3000);
+                quote = marketDataManager.getSpotPrice(ticker);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         double bidPrice = quote.getBid();
         double askPrice = quote.getAsk();
 
@@ -226,8 +258,8 @@ public class ExecutionManager {
 
     public boolean activateStrategy(String id) {
         Strategy strategy = strategies.get(id);
+        Logger.debug("Registered Strategies: {}", strategies.size());
         if (strategy.getIsClose() == null) {
-            //TODO update database - done XW check again
             strategy.setIsClose(false);
             truffleDataManager.activateStrategy(strategy.getId());
             return true;

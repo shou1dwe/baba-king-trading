@@ -1,15 +1,15 @@
 package marketdatamanagement;
 
-import com.google.common.base.Strings;
 import marketdatamanagement.callbacks.OnCompanyInfoReceiveListener;
-import marketdatamanagement.callbacks.OnSpotPriceReceiveListener;
 import marketdatamanagement.datatransferobjects.Quote;
 import models.Stock;
+import play.Logger;
 import play.libs.F;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -21,23 +21,23 @@ public class YahooMarketData implements MarketDataSource {
     private String companyInfoUrlFormat = "http://finance.yahoo.com/d/quotes.csv?s=%s&f=s0i0n0n4x0&e=.csv";
 
     @Override
-    public F.Promise<Quote> getSpotPrice(Set<String> tickers, final OnSpotPriceReceiveListener onSpotPriceReceiveListener) {
+    public F.Promise<Set<Quote>> getSpotPrices(Set<String> tickers) {
         return WS.url(generateSpotPriceURL(tickers)).get().map(
-                new F.Function<WSResponse, Quote>() {
-                    public Quote apply(WSResponse response) {
+                new F.Function<WSResponse, Set<Quote>>() {
+                    public Set<Quote> apply(WSResponse response) {
                         String content = response.getBody();
                         Scanner scanner = new Scanner(content);
+                        Set<Quote> quotes = new HashSet<Quote>();
                         while (scanner.hasNextLine()) {
                             String line = scanner.nextLine();
-
                             String[] valueForName = line.split(",");
                             String ticker = valueForName[0];
-                            ticker = ticker.substring(1,ticker.length()-1);
+                            ticker = removeQuotes(ticker);
 
                             line = line.replace("\"","");
-                            line = line.replace(String.format(",%s,",ticker),"-");
+                            line = line.replace(String.format(",%s,",ticker),"_");
                             line = line.replace(String.format("%s,",ticker),"");
-                            String[] values = line.split("-");
+                            String[] values = line.split("_");
 
                             if (!ticker.equalsIgnoreCase("N/A") && !values[0].equalsIgnoreCase("N/A")
                                     && !values[2].equalsIgnoreCase("N/A") && !values[4].equalsIgnoreCase("N/A")) {
@@ -48,12 +48,11 @@ public class YahooMarketData implements MarketDataSource {
                                 double lastTradePrice = Double.parseDouble(values[4].replace(",",""));
                                 double change = Double.parseDouble(values[5].replace(",",""));
                                 Quote quote = new Quote(ticker, ask, askSize, bid, bidSize, lastTradePrice, change, new Date());
-                                onSpotPriceReceiveListener.onSpotPriceReceived(quote);
+                                quotes.add(quote);
                             }
                         }
                         scanner.close();
-                        System.out.println(response.getBody());
-                        return null;
+                        return quotes;
                     }
                 }
         );
@@ -74,9 +73,15 @@ public class YahooMarketData implements MarketDataSource {
                             String companyName = removeQuotes(value[2]);
                             String notes = removeQuotes(value[3]);
                             String exchange = removeQuotes(value[4]);
-                            Stock stock = new Stock(symbol, companyName, moreInfo, notes, exchange);
-                            onCompanyInfoReceiveListener.onCompanyInfoReceive(stock);
-                            return stock;
+                            if("N/A".equals(exchange)){
+                                onCompanyInfoReceiveListener.onCompanyNotExist();
+                                return null;
+                            }else {
+                                Stock stock = new Stock(symbol, companyName, moreInfo, notes, exchange);
+                                onCompanyInfoReceiveListener.onCompanyInfoReceive(stock);
+                                return stock;
+                            }
+
                         }
                         scanner.close();
                         System.out.println(response.getBody());
