@@ -49,6 +49,10 @@ public class Position {
         this.isOpen = true;
     }
 
+    public void closePosition(){
+        this.isClose=true;
+    }
+
     public int getRemainingVolume() {
         return remainingVolume;
     }

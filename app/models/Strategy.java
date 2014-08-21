@@ -2,6 +2,7 @@ package models;
 
 import play.db.ebean.Model;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 
 /**
@@ -22,6 +23,10 @@ public class Strategy extends Model{
     public double lossPercent;
     public double profitPercent;
     public String extras;
+    @Column(nullable = true)
+    public Boolean isClose;
+    //0:close 1:open 2:activated 3:deactivated
+    public boolean isDeleted;
 
     public Strategy(String stratId, Stock stock, int vol, int remainingVol, double lossPercent, double profitPercent, String extras, Template templateId) {
         this.stratId = stratId;
@@ -32,6 +37,8 @@ public class Strategy extends Model{
         this.profitPercent = profitPercent;
         this.extras = extras;
         this.templateId = templateId;
+        this.isClose=null;
+        this.isDeleted=false;
     }
 
     @ManyToOne

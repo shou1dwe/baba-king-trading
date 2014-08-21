@@ -13,6 +13,8 @@ public class Strategy {
     private double percentLoss;
     private double percentProfit;
     private List<Position> positions;
+    private Boolean isClose;
+    //null: deactivated  0:activated/open    1:activated/close
 
     public Strategy(){}
 
@@ -24,6 +26,8 @@ public class Strategy {
         this.percentLoss = percentLoss;
         this.percentProfit = percentProfit;
         this.positions = positions;
+        this.isClose=null;
+
     }
 
     public String getId() {
@@ -80,5 +84,13 @@ public class Strategy {
 
     public void setPositions(List<Position> positions) {
         this.positions = positions;
+    }
+
+    public Boolean getIsClose() {
+        return isClose;
+    }
+
+    public void setIsClose(Boolean isClose) {
+        this.isClose = isClose;
     }
 }

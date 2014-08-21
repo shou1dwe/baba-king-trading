@@ -73,7 +73,42 @@ public class TruffleDataManager {
     }
 
     public void deleteStrategy(String id){
-        Strategy.find.ref(id).delete();
+        Strategy strategy = Strategy.find.ref(id);
+        strategy.isDeleted=true;
+        Ebean.update(strategy);
+    }
+
+    public Strategy activateStrategy(String id) {
+        Strategy strategy = Strategy.find.ref(id);
+        strategy.isClose=false;
+        Ebean.update(strategy);
+        return strategy;
+    }
+
+
+    public Strategy deactivateStrategy(String id) {
+        Strategy strategy = Strategy.find.ref(id);
+        strategy.isClose=null;
+        Ebean.update(strategy);
+        return strategy;
+    }
+
+    public Strategy closeStrategy(String id) {
+        Strategy strategy = Strategy.find.ref(id);
+        strategy.isClose=true;
+        Ebean.update(strategy);
+        return strategy;
+    }
+    public Strategy modifyTwoMovingAveragesStrategy(String id, int longPeriod, int shortPeriod, double percentLoss, double percentProfit) {
+        Strategy strategy = Strategy.find.ref(id);
+        ObjectNode result = Json.newObject();
+        result.put("longPeriod", longPeriod);
+        result.put("shortPeriod", shortPeriod);
+        strategy.extras= result.toString();
+        strategy.lossPercent=percentLoss;
+        strategy.profitPercent=percentProfit;
+        Ebean.update(strategy);
+        return strategy;
     }
 
     // Template Related
@@ -103,8 +138,16 @@ public class TruffleDataManager {
         return history;
     }
 
+    public ActionHistory closeActionHistory(int hisId){
+        ActionHistory history=ActionHistory.find.ref(hisId);
+        history.isClose=true;
+        Ebean.update(history);
+        return history;
+    }
+
     public void deleteTransaction(int id){
         ActionHistory.find.ref(id).delete();
     }
+
 
 }
