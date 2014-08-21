@@ -78,6 +78,9 @@ public class MarketDataManager {
         if (!latestPrices.containsKey(ticker)){
             latestPrices.put(ticker, null);
         }
+        if (!historicPrices.containsKey(ticker)){
+            historicPrices.put(ticker,new ArrayList<Double>());
+        }
     }
 
     public Quote getSpotPrice(String stock) {
@@ -91,13 +94,12 @@ public class MarketDataManager {
         int count = (shortPeriod*60/UPDATE_RATE); // How many entries we need for calculating shortPeriod average
         double sum = 0;
         int sizeOfPrices = prices.size();
-
         if(sizeOfPrices < count){
             throw new NoShortAverageAvailableException("There is not enough data for short average calculation.");
-        }
-
-        for(int i=0 ; i<count; i++){
-            sum += prices.get(sizeOfPrices - 1 - i);
+        } else {
+            for (int i = 0; i < count; i++) {
+                sum += prices.get(sizeOfPrices - 1 - i);
+            }
         }
         return sum/count;
     }
@@ -149,4 +151,32 @@ public class MarketDataManager {
         }
     }
 
+    //getters and setters
+    public Map<String, Double> getLongAverages() {
+        return longAverages;
+    }
+
+    public void setLongAverages(Map<String, Double> longAverages) {
+        this.longAverages = longAverages;
+    }
+
+    public Map<String, List<Double>> getHistoricPrices() {
+        return historicPrices;
+    }
+
+    public void setHistoricPrices(Map<String, List<Double>> historicPrices) {
+        this.historicPrices = historicPrices;
+    }
+
+    public Map<String, Quote> getLatestPrices() {
+        return latestPrices;
+    }
+
+    public void setLatestPrices(Map<String, Quote> latestPrices) {
+        this.latestPrices = latestPrices;
+    }
+
+    public String getHistoricalUrl() {
+        return historicalUrl;
+    }
 }
