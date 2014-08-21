@@ -19,6 +19,7 @@ import play.mvc.Results;
 import views.html.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -122,9 +123,12 @@ public class Application extends Controller {
                     strategiesClosed.add(strategy);
                 }
             }
+
+            List<executionmanagement.datatransferobjects.Strategy> strategiesRunningActive = new ArrayList<>(executionManager.getStrategies().values());
+
             Quote quote = adhocExecutionManager.getLatestQuote(tickerSymbol);
             //TODO link up webpage
-            return ok(stock_view.render(stock, strategiesActive, strategiesClosed, quote));
+            return ok(stock_view.render(stock, strategiesRunningActive, strategiesClosed, quote));
         }
         return Results.TODO;
     }
@@ -171,6 +175,11 @@ public class Application extends Controller {
         if (quote != null) {
             result.put("timestamp", quote.getTime().getTime());
             result.put("price", quote.getLastTradePrice());
+            result.put("ask", quote.getAsk());
+            result.put("askSize", quote.getAskSize());
+            result.put("bid", quote.getBid());
+            result.put("bidSize", quote.getBidSize());
+            result.put("change",quote.getChange());
             return ok(result);
         } else {
             return internalServerError();

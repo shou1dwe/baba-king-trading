@@ -13,12 +13,12 @@ public class Quote {
     private int bidSize;
     private double lastTradePrice;
     private Date time;
-    private double change;
+    private String change;
 
     public Quote() {
     }
 
-    public Quote(String tickerSymbol, double ask, int askSize, double bid, int bidSize, double lastTradePrice, double change, Date time) {
+    public Quote(String tickerSymbol, double ask, int askSize, double bid, int bidSize, double lastTradePrice, String change, Date time) {
         this.tickerSymbol = tickerSymbol != null ? tickerSymbol.toUpperCase() : null;
         this.ask = ask;
         this.askSize = askSize;
@@ -85,11 +85,11 @@ public class Quote {
         this.time = time;
     }
 
-    public double getChange() {
+    public String getChange() {
         return change;
     }
 
-    public void setChange(double change) {
+    public void setChange(String change) {
         this.change = change;
     }
 

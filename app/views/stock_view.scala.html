@@ -1,4 +1,4 @@
-@(stock: Stock, strategiesActive: List[Strategy], strategiesClosed: List[Strategy], quote: marketdatamanagement.datatransferobjects.Quote)
+@(stock: Stock, strategiesActive: List[executionmanagement.datatransferobjects.Strategy], strategiesClosed: List[Strategy], quote: marketdatamanagement.datatransferobjects.Quote)
 
 @main(stock.companyName){
     <div class="row" style="padding-top: 20px">
@@ -24,22 +24,22 @@
                         <table class="table table-striped">
                             <tbody>
                                 <tr>
-                                    <td>Open:</td><td></td>
+                                    <td>Change:</td><td id="change">@quote.getChange()</td>
                                 </tr>
                                 <tr>
-                                    <td>Close:</td><td></td>
+                                    <td>Ask:</td><td id="ask">@quote.getAsk()</td>
                                 </tr>
                                 <tr>
-                                    <td>Ask:</td><td>@quote.getAsk()</td>
+                                    <td>Ask Size:</td>
+                                    <td id="ask-size">@quote.getAskSize()</td>
                                 </tr>
                                 <tr>
-                                    <td>Ask Size:</td><td>@quote.getAskSize()</td>
+                                    <td>Bid:</td>
+                                    <td id="bid">@quote.getBid()</td>
                                 </tr>
                                 <tr>
-                                    <td>Bid:</td><td>@quote.getBid()</td>
-                                </tr>
-                                <tr>
-                                    <td>Bid Size:</td><td>@quote.getBidSize()</td>
+                                    <td>Bid Size:</td>
+                                    <td id="bid-size">@quote.getBidSize()</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -164,16 +164,16 @@
                                         @for(strategy <- strategiesActive) {
                                             <tr>
                                                 <td>
-                                                    @if(strategy.isClose == null) {
-                                                        <a href="/strategy/activate/@strategy.stratId" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-play"></span></a>
+                                                    @if(strategy.getIsClose == null) {
+                                                        <a href="/strategy/activate/@strategy.getId" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-play"></span></a>
                                                     } else {
-                                                        <a href="/strategy/deactivate/@strategy.stratId" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-play"></span></a>
+                                                        <a href="/strategy/deactivate/@strategy.getId" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-play"></span></a>
                                                     }
                                                 </td>
                                                 <td>{strategy name}</td>
-                                                <td>@strategy.remainingVol / @strategy.vol</td>
-                                                <td>@strategy.profitPercent% ~ -@strategy.lossPercent%</td>
-                                                <td>@strategy.stratId</td>
+                                                <td>@strategy.getRemaingVolume / @strategy.getVolume</td>
+                                                <td>@strategy.getPercentProfit% ~ -@strategy.getPercentLoss%</td>
+                                                <td>@strategy.getId</td>
                                                 <td><a href="#" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-pencil"></span> Modify</a></td>
                                             </tr>
                                         }
@@ -243,10 +243,23 @@
     var x = result.timestamp, // current time
     y = result.price;
     series.addPoint([x, y], true, true);
+        $('#ask').text(result.ask);
+        if(result.askSize == -1){
+        $('#ask-size').text("N/A");
+        }else {
+        $('#ask-size').text(result.askSize);
+        }
+        if(result.bidSize == -1){
+        $('#bid-size').text("N/A");
+        }else {
+        $('#bid-size').text(result.bidSize);
+        }
+        $('#bid').text(result.bid);
+        $('#change' ).text(result.change);
     }
     });
 
-    }, 10000);
+    }, 20000);
     }
     }
     },

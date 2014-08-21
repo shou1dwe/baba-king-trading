@@ -27,7 +27,6 @@ public class Strategy {
         this.percentProfit = percentProfit;
         this.positions = positions;
         this.isClose=null;
-
     }
 
     public String getId() {
