@@ -102,9 +102,9 @@ public class ExecutionManager {
                         : "Time to go short.");
                 boolean isBuyOrder = isGoLong; // When opening position go long -> buy; go short -> sell
                 double strikePrice = isGoLong ? askPrice : bidPrice;
-                if (askSize == 0)
+                if (askSize == -1)
                     askSize = strategy.getRemaingVolume();
-                if (bidSize == 0)
+                if (bidSize == -1)
                     bidSize = strategy.getRemaingVolume();
                 int offeredVolume = isGoLong ? askSize : bidSize;
                 int usedVolume = offeredVolume > strategy.getRemaingVolume() ? strategy.getRemaingVolume() : offeredVolume;
@@ -125,7 +125,6 @@ public class ExecutionManager {
     }
 
     private void submitOrderToBroker(String tickerSymbol, boolean isBuyOrder, int size, double price, Position position) {
-
         Trade tradeSubmitted = truffleOrderManager.submitTrade(tickerSymbol, isBuyOrder, size, price, new TruffleOrderConfirmationListener() {
             //in the close or open Trade Transaction;
             //actually open position, or set a positon to close, record to database
@@ -184,8 +183,9 @@ public class ExecutionManager {
         tradePositionMap.put(tradeSubmitted.getId(), position);
     }
 
+    //run this method for position with remainingVolume>0
     public void attemptClosePosition(String ticker, Position p, List<Position> positions, double percentLoss, double percentProfit) {
-        //run this method for position with remainingVolume>0
+
         double percentChange = 0;
         Quote quote = marketDataManager.getSpotPrice(ticker);
         double bidPrice = quote.getBid();
@@ -239,7 +239,6 @@ public class ExecutionManager {
     public boolean deactivateStrategy(String id) {
         Strategy strategy = strategies.get(id);
         if (strategy.getIsClose() != null) {
-            System.out.println("Im here");
             //TODO update database - done XW check again
             strategy.setIsClose(null);
             truffleDataManager.deactivateStrategy(strategy.getId());
@@ -249,9 +248,10 @@ public class ExecutionManager {
         }
     }
 
+    //can only modify strategy without positions.
     public boolean modifyTwoMovingAveragesStrategy(String id, int longPeriod, int shortPeriod,
                                                    double percentLoss, double percentProfit) {
-        //can only modify strategy without positions.
+
         Strategy strategy = strategies.get(id);
         if (strategy.getPositions().isEmpty() && strategy.getRemaingVolume() == strategy.getVolume()) {
             if (strategy instanceof TwoMovingAveragesStrategy) {

@@ -17,7 +17,7 @@ import java.util.Set;
  * Created by user on 8/16/2014.
  */
 public class YahooMarketData implements MarketDataSource {
-    private String spotPriceUrlFormat = "http://finance.yahoo.com/d/quotes.csv?s=%s&f=s0b2a5b3b6l1&e=.csv";
+    private String spotPriceUrlFormat = "http://finance.yahoo.com/d/quotes.csv?s=%s&f=s0b2s0a5s0b3s0b6s0l1s0c6&e=.csv";
     private String companyInfoUrlFormat = "http://finance.yahoo.com/d/quotes.csv?s=%s&f=s0i0n0n4x0&e=.csv";
 
     @Override
@@ -29,17 +29,25 @@ public class YahooMarketData implements MarketDataSource {
                         Scanner scanner = new Scanner(content);
                         while (scanner.hasNextLine()) {
                             String line = scanner.nextLine();
-                            String[] value = line.split(",");
 
-                            if (!value[0].equalsIgnoreCase("N/A") && !value[1].equalsIgnoreCase("N/A")
-                                    && !value[3].equalsIgnoreCase("N/A") && !value[5].equalsIgnoreCase("N/A")) {
-                                String tickerSymbol = value[0];
-                                double ask = Double.parseDouble(value[1]);
-                                int askSize = value[2].equalsIgnoreCase("N/A") ? 0 : Integer.parseInt(value[2]);
-                                double bid = Double.parseDouble(value[3]);
-                                int bidSize = value[4].equalsIgnoreCase("N/A") ? 0 : Integer.parseInt(value[4]);
-                                double lastTradePrice = Double.parseDouble(value[5]);
-                                Quote quote = new Quote(tickerSymbol, ask, askSize, bid, bidSize, lastTradePrice, new Date());
+                            String[] valueForName = line.split(",");
+                            String ticker = valueForName[0];
+                            ticker = ticker.substring(1,ticker.length()-1);
+
+                            line = line.replace("\"","");
+                            line = line.replace(String.format(",%s,",ticker),"-");
+                            line = line.replace(String.format("%s,",ticker),"");
+                            String[] values = line.split("-");
+
+                            if (!ticker.equalsIgnoreCase("N/A") && !values[0].equalsIgnoreCase("N/A")
+                                    && !values[2].equalsIgnoreCase("N/A") && !values[4].equalsIgnoreCase("N/A")) {
+                                double ask = Double.parseDouble(values[0].replace(",",""));
+                                int askSize = values[1].equalsIgnoreCase("N/A") ? -1 : Integer.parseInt(values[1].replace(",",""));
+                                double bid = Double.parseDouble(values[2].replace(",",""));
+                                int bidSize = values[3].equalsIgnoreCase("N/A") ? -1 : Integer.parseInt(values[3].replace(",",""));
+                                double lastTradePrice = Double.parseDouble(values[4].replace(",",""));
+                                double change = Double.parseDouble(values[5].replace(",",""));
+                                Quote quote = new Quote(ticker, ask, askSize, bid, bidSize, lastTradePrice, change, new Date());
                                 onSpotPriceReceiveListener.onSpotPriceReceived(quote);
                             }
                         }
