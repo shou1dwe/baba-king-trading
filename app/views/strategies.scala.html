@@ -1,16 +1,15 @@
-@(message: String)
+@(strategiesActive: List[Strategy], strategiesClosed: List[Strategy])
+
 
     @content = {
-        <link href="@routes.Assets.at("css/plugins/dataTables.bootstrap.css")" rel="stylesheet">
         <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Strategies</h1>
-            </div>
-                <!-- /.col-lg-12 -->
+            <h1 class="page-header">My Strategies</h1>
+        </div>
+        <div class="row">
 
-            <div class="panel-body">
+            <div class="panel-body" style="padding-top: 20px">
                     <!-- Nav tabs -->
-                <ul class="nav nav-tabs">
+                <ul class="nav nav-tabs" style="margin-bottom: 20px">
                     <li class="active" >
                         <a href="#active" data-toggle="tab"><i class="fa fa-tasks"></i> &nbspActive Strategies</a>
                     </li>
@@ -22,84 +21,43 @@
                     <!-- Tab panes -->
                 <div class="tab-content">
                     <div class="tab-pane fade active in" id="active">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
 
-                        <div class="table-responsive">
-                            <table class="table table-striped table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Template</th>
-                                        <th>Stock Symbol</th>
-                                        <th>Quantity</th>
-                                        <th>Profit Percentage</th>
-                                        <th>Loss Percentage</th>
-                                        <th>Long Duration (days)</th>
-                                        <th>Short Duration (mins)</th>
-                                        <th>Strike Price</th>
-                                        <th>Entry Time</th>
-                                            <!--<th>Area</th>-->
+                                    <div class="panel-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-bordered table-hover" id="dataTables-active">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Stock Symbol</th>
+                                                        <th>Template</th>
+                                                        <th>Volume</th>
+                                                        <th>Profit Percentage</th>
+                                                        <th>Loss Percentage</th>
+                                                        <th>Exchange</th>
+                                                        <th style="padding-right : 20 px"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
 
-                                            <!--<th>Opening Hours</th>-->
-                                        <th style=""></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-
-                                    <tr>
-
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                            <!--<td>1300 - 2200</td>-->
-                                        <td class="btn-group btn-group-sm">
-
-                                            <button align="center" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                                <span class="caret"></span>
-                                                <span class="sr-only">Toggle Dropdown</span>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                                <li><a href="/strategy/modify"><span class="glyphicon glyphicon-edit"></span> Modify</a></li>
-                                                <li class="divider"></li>
-                                                <li><a href="/strategies"><span class="glyphicon glyphicon-trash"></span> Delete</a></li>
-                                            </ul>
-
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                            <!--<td>9:00 to 21:00</td>-->
-                                        <td class="btn-group btn-group-sm">
-
-                                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                                <span class="caret"></span>
-                                                <span class="sr-only">Toggle Dropdown</span>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                                <li><a href="/strategy/modify"><span class="glyphicon glyphicon-edit"></span> Modify</a></li>
-                                                <li class="divider"></li>
-                                                <li><a href="/strategies"><span class="glyphicon glyphicon-trash"></span> Delete</a></li>
-                                            </ul>
-
-                                        </td>
-                                    </tr>
-
-                                </tbody>
-                            </table>
-                        </div>
+                                                @for(strategy <- strategiesActive) {
+                                                    <tr>
+                                                        <td>@strategy.stock.ticker</td>
+                                                        <td>@strategy.templateId.name</td>
+                                                        <td>@strategy.remainingVol / @strategy.vol</td>
+                                                        <td>@strategy.profitPercent%</td>
+                                                        <td>-@strategy.lossPercent%</td>
+                                                        <td>@strategy.stock.exchange</td>
+                                                        <td><a href="/strategy/modify/@strategy.stratId" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-edit"></span>
+                                                            Modify</a></td>
+                                                    </tr>
+                                                }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div></div></div>
                     </div>
 
                     <div class="tab-pane fade" id="history">
@@ -119,20 +77,19 @@
                                                         <th>Long Duration (days)</th>
                                                         <th>Short Duration (mins)</th>
                                                         <th>Performance</th>
-                                                        <th>Close Time</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr class="strategy">
-                                                        <td>Two Moving Average </td>
-                                                        <td>AAPL</td>
-                                                        <td>200</td>
-                                                        <td class="">4</td>
-                                                        <td class="">20</td>
-                                                        <td class="">+3.56</td>
-                                                        <td class="">dd:mm:yyyy::hh:mm:ss</td>
-                                                    </tr>
-
+                                                    @for(strategy <- strategiesClosed) {
+                                                        <tr>
+                                                            <td>@strategy.stock.ticker</td>
+                                                            <td>@strategy.templateId.name</td>
+                                                            <td>@strategy.vol</td>
+                                                            <td>@strategy.profitPercent%</td>
+                                                            <td>-@strategy.lossPercent%</td>
+                                                            <td>@strategy.stock.exchange</td>
+                                                        </tr>
+                                                    }
                                                 </tbody>
                                             </table>
                                         </div>
@@ -154,16 +111,18 @@
 
 
 
+
     }
 
 
-@main("Strategies")(content){
+@main("Strategies")(content) {
     <!-- DataTables JavaScript -->
-    <script src="@routes.Assets.at("js/plugins/dataTables/dataTables.bootstrap.js")"></script>
     <script src="@routes.Assets.at("js/plugins/dataTables/jquery.dataTables.js")"></script>
+    <script src="@routes.Assets.at("js/plugins/dataTables/dataTables.bootstrap.js")"></script>
 
     <script>
         $(document).ready(function() {
+            $('#dataTables-active').dataTable();
             $('#dataTables-example').dataTable();
         });
     </script>

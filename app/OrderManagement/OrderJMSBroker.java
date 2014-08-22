@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class OrderJMSBroker implements OrderBroker {
     public static final String QUEUE_REQUEST = "OrderBroker";
     private final String QUEUE_RESPONSE = "OrderBroker_Reply";
-    private final String externalActiveMqUrl = "tcp://10.87.194.159:61616";
+    private final String externalActiveMqUrl = "tcp://10.87.202.67:61616";
     private Connection connection;
 
     private static JAXBContext context;

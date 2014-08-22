@@ -156,7 +156,7 @@
                                             <th>Strategy Name</th>
                                             <th>Remainging / Volume</th>
                                             <th>Target Range</th>
-                                            <th>Performance</th>
+                                            <th>Strategy ID</th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -170,11 +170,11 @@
                                                         <a href="/strategy/deactivate/@strategy.getId" class="btn btn-success btn-xs"><span class="glyphicon glyphicon-play"></span></a>
                                                     }
                                                 </td>
-                                                <td>{strategy name}</td>
+                                                <td>@strategy.getId</td>
                                                 <td>@strategy.getRemaingVolume / @strategy.getVolume</td>
                                                 <td>@strategy.getPercentProfit% ~ -@strategy.getPercentLoss%</td>
                                                 <td>@strategy.getId</td>
-                                                <td><a href="#" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-pencil"></span> Modify</a></td>
+                                                <td><a href="/strategy/modify/@strategy.getId" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-pencil"></span> Modify</a></td>
                                             </tr>
                                         }
                                     </tbody>
@@ -189,18 +189,18 @@
                                             <th>Strategy Name</th>
                                             <th>Remainging / Volume</th>
                                             <th>Target Range</th>
-                                            <th>Performance</th>
+                                            <th>Strategy ID</th>
                                             <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                     @for(strategy <- strategiesClosed) {
                                         <tr>
-                                            <td>{strategy name}</td>
+                                            <td>@strategy.name</td>
                                             <td>@strategy.remainingVol / @strategy.vol</td>
                                             <td>@strategy.profitPercent% ~ -@strategy.lossPercent%</td>
                                             <td>@strategy.stratId</td>
-                                            <td><a href="#" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-pencil"></span> Modify</a></td>
+                                            <td><a href="/strategy/modify/@strategy.stratId" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-pencil"></span> Modify</a></td>
                                         </tr>
                                     }
                                     </tbody>

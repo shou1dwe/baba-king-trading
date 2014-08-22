@@ -5,6 +5,7 @@ import marketdatamanagement.MarketDataManager;
 import marketdatamanagement.callbacks.OnCompanyInfoReceiveListener;
 import marketdatamanagement.datatransferobjects.Quote;
 import models.Stock;
+import models.Strategy;
 import play.Logger;
 
 /**
@@ -50,5 +51,9 @@ public class AdhocExecutionManager {
             quote = marketDataManager.getSpotPriceRealtime(tickerSymbol);
         }
         return quote;
+    }
+
+    public Strategy getStrategy(String id){
+        return truffleDataManager.getStrategyById(id);
     }
 }

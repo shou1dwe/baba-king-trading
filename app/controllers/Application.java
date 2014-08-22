@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import datamanagement.TruffleDataManager;
 import executionmanagement.AdhocExecutionManager;
 import executionmanagement.ExecutionManager;
+import executionmanagement.datatransferobjects.TwoMovingAveragesStrategy;
 import marketdatamanagement.MarketDataManager;
 import marketdatamanagement.datatransferobjects.Quote;
 import models.Stock;
@@ -95,13 +96,19 @@ public class Application extends Controller {
     }
 
     public static Result strategyModify(String id) {
-        truffleDataManager.getStrategyById(id);
-        return ok(strategy_modify.render("Modify {Strategy Title}"));
+        Strategy strategy = truffleDataManager.getStrategyById(id);
+        return ok(strategy_modify.render(strategy));
     }
 
     public static Result strategyModifyPost(String id) {
-        // TODO
-        return play.mvc.Results.TODO;
+        Map<String, String[]> params = request().body().asFormUrlEncoded();
+        Integer longPeriod = Integer.parseInt(params.get("longDur")[0]);
+        Integer shortPeriod = Integer.parseInt(params.get("shortDur")[0]);
+        Double profitPercent = Double.parseDouble(params.get("profitPer")[0]);
+        Double lossPercent = Double.parseDouble(params.get("lossPer")[0]);
+        executionManager.modifyTwoMovingAveragesStrategy(id, longPeriod, shortPeriod, lossPercent, profitPercent);
+
+        return strategies();
     }
 
     public static Result strategyRemove(String id) {
